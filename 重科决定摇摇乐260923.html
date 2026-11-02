@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>做个决定吧【重科版】</title>
+<style>
+:root{--p:#3470EE;--p2:#5E8CFF;--ink:#1E2A44;--sub:#7B87A0;--line:#DCE6FB;
+  --bg1:#F5F8FF;--bg2:#EAF0FE;--card:#fff;--tag:#EEF4FF;--ok:#22B07D;
+  --sh:0 6px 24px rgba(52,112,238,.10);--r:20px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  color:var(--ink);min-height:100vh;padding:24px 18px calc(24px + env(safe-area-inset-bottom));
+  background:linear-gradient(160deg,var(--bg1),var(--bg2) 60%,var(--bg1));
+  display:flex;justify-content:center}
+main{width:100%;max-width:480px}
+section{display:none}
+section.on{display:block;animation:in .32s cubic-bezier(.22,.61,.36,1)}
+@keyframes in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* ===== 首页 ===== */
+.home-head{text-align:center;margin:26px 0 30px}
+.logo{font-size:52px;display:inline-block;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+h1{font-size:30px;font-weight:800;letter-spacing:1px;margin-top:6px;
+  background:linear-gradient(120deg,var(--p),#7AA5FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.home-sub{font-size:14px;color:var(--sub);margin-top:6px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:26px 18px;text-align:center;cursor:pointer;box-shadow:var(--sh);
+  transition:transform .2s cubic-bezier(.22,.61,.36,1),box-shadow .25s}
+@media(hover:hover){.tile:hover{transform:translateY(-4px);box-shadow:0 14px 32px rgba(52,112,238,.18)}}
+.tile:active{transform:scale(.96)}
+.tile .ti{font-size:34px}
+.tile .tn{font-size:17px;font-weight:700;margin-top:10px}
+.tile .td{font-size:12px;color:var(--sub);margin-top:4px}
+footer{text-align:center;font-size:12px;color:var(--sub);margin-top:34px;letter-spacing:1px}
+footer span{display:block;margin-top:6px;font-size:11px;color:#9AA6BC;letter-spacing:2px}
+
+/* ===== 二级页头部 ===== */
+.top{display:flex;align-items:center;gap:10px;margin:4px 0 18px}
+.back{width:38px;height:38px;border-radius:50%;background:var(--card);border:1px solid var(--line);
+  cursor:pointer;font-size:19px;color:var(--p);display:grid;place-items:center;box-shadow:var(--sh);
+  transition:transform .2s;flex:none}
+.back:active{transform:scale(.88)}
+.top h2{font-size:21px;font-weight:800}
+.top .cnt{font-size:12px;color:var(--sub);margin-left:auto}
+
+/* ===== 分段控件 ===== */
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:4px;box-shadow:var(--sh);margin-bottom:16px}
+.seg span{flex:1;text-align:center;padding:9px 0;font-size:14px;font-weight:600;color:var(--sub);
+  border-radius:11px;cursor:pointer;transition:all .22s;user-select:none}
+.seg span.on{background:linear-gradient(120deg,var(--p),var(--p2));color:#fff;
+  box-shadow:0 4px 12px rgba(52,112,238,.35)}
+
+/* ===== 结果卡 ===== */
+.res{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--sh);padding:36px 22px;text-align:center;position:relative;overflow:hidden;
+  min-height:216px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.res::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--p),var(--p2),#8FB4FF,var(--p));background-size:300% 100%;
+  animation:sheen 3s linear infinite}
+@keyframes sheen{to{background-position:300% 0}}
+.res .ri{font-size:64px;line-height:1.15}
+.res .rn{font-size:30px;font-weight:800;margin-top:8px;transition:.3s}
+.res .rd{font-size:14px;color:var(--sub);margin-top:8px;line-height:1.65;max-width:24em;min-height:22px}
+.res .rm{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap;justify-content:center;min-height:24px}
+.pill{font-size:12px;padding:3px 11px;border-radius:20px;background:var(--tag);color:var(--p);font-weight:600}
+.res.empty .ri{opacity:.45;font-size:52px}
+.res.empty .rn{font-size:19px;color:#B9C2D4;font-weight:600}
+.spinning .ri{animation:rot .5s linear infinite}
+.spinning .rn{animation:fl .45s ease-in-out infinite}
+@keyframes rot{50%{transform:rotate(180deg) scale(1.18)}to{transform:rotate(360deg)}}
+@keyframes fl{50%{opacity:.25;transform:scale(.92)}}
+.settled .ri{animation:drop .55s cubic-bezier(.34,1.56,.64,1)}
+.settled .rn{animation:drop .55s cubic-bezier(.34,1.56,.64,1) .06s backwards}
+@keyframes drop{0%{transform:translateY(-24px) scale(.6);opacity:0}60%{transform:translateY(0) scale(1.1)}100%{transform:none;opacity:1}}
+.halo{position:absolute;top:30%;width:110px;height:110px;border-radius:50%;
+  border:3px solid var(--p);opacity:0;pointer-events:none}
+.halo.go{animation:hl .65s ease-out}
+@keyframes hl{0%{transform:scale(.3);opacity:.5}100%{transform:scale(2);opacity:0}}
+
+/* ===== 按钮 ===== */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  background:linear-gradient(120deg,var(--p),var(--p2));color:#fff;border:none;
+  padding:15px;font-size:17px;font-weight:700;border-radius:16px;cursor:pointer;letter-spacing:1px;
+  box-shadow:0 8px 22px rgba(52,112,238,.35);transition:.22s;margin-top:18px}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.subs{display:flex;gap:10px;margin-top:12px;max-height:0;opacity:0;overflow:hidden;transition:.3s}
+.subs.show{max-height:60px;opacity:1}
+.sb{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:12px;
+  font-size:15px;font-weight:600;border-radius:14px;cursor:pointer;background:var(--card);
+  border:1.5px solid var(--line);color:var(--ink);transition:.2s}
+.sb:hover{border-color:var(--p);color:var(--p)}
+.sb:active{transform:scale(.96)}
+.sb.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.note{text-align:center;font-size:12px;color:var(--sub);margin-top:14px}
+
+/* ===== 自定义编辑 ===== */
+.row{display:flex;gap:8px;margin-bottom:10px}
+.inp{flex:1;font:inherit;font-size:14px;padding:11px 13px;border:1.5px solid var(--line);
+  border-radius:13px;outline:none;background:#fff;color:var(--ink);transition:.2s;min-width:0}
+.inp:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--tag)}
+.add{background:linear-gradient(120deg,var(--p),var(--p2));color:#fff;border:none;border-radius:13px;
+  padding:0 20px;font-size:14px;font-weight:700;cursor:pointer;transition:.2s}
+.add:active{transform:scale(.94)}
+.box{border:1.5px solid var(--line);border-radius:13px;background:#fff;max-height:190px;overflow:auto}
+.it{display:flex;align-items:center;gap:10px;padding:10px 13px;border-bottom:1px solid var(--line);font-size:14px}
+.it:last-child{border-bottom:none}
+.it span{flex:1}
+.it i{font-style:normal;color:#C4CCDB;cursor:pointer;font-size:17px;padding:0 3px}
+.it i:hover{color:var(--p)}
+.ta{width:100%;font:inherit;font-size:13px;line-height:1.8;padding:12px;border:1.5px solid var(--line);
+  border-radius:13px;outline:none;resize:vertical;height:120px;color:var(--ink)}
+.ta:focus{border-color:var(--p)}
+.tools{display:flex;gap:8px;margin-top:10px}
+.tb{font:inherit;font-size:13px;font-weight:600;padding:9px 16px;border-radius:12px;cursor:pointer;
+  background:#fff;border:1.5px solid var(--line);color:var(--sub);transition:.2s}
+.tb:hover{border-color:var(--p);color:var(--p)}
+.tb.pri{background:linear-gradient(120deg,var(--p),var(--p2));border:none;color:#fff}
+h3.lb{font-size:13px;color:var(--sub);font-weight:600;margin:18px 0 8px}
+
+/* ===== Toast ===== */
+.tw{position:fixed;top:18px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:50;pointer-events:none}
+.to{background:rgba(30,42,68,.9);color:#fff;font-size:13px;font-weight:600;padding:10px 22px;
+  border-radius:24px;animation:tin .3s cubic-bezier(.22,.61,.36,1),tout .3s 1.8s ease-in forwards}
+.to.ok{background:var(--ok)}
+@keyframes tin{from{opacity:0;transform:translateY(-14px) scale(.9)}}
+@keyframes tout{to{opacity:0;transform:translateY(-10px)}}
+@media(max-width:420px){.res .rn{font-size:25px}.tile{padding:20px 14px}.tile .ti{font-size:29px}}
+</style>
+</head>
+<body>
+<main>
+  <!-- ===== 首页 ===== -->
+  <section id="pg-home" class="on">
+    <div class="home-head">
+      <span class="logo">🎲</span>
+      <h1>做个决定吧【重科版】</h1>
+      <p class="home-sub">选择困难症救星 · 把犹豫交给运气</p>
+    </div>
+    <div class="grid">
+      <div class="tile" data-go="food"><div class="ti">🍜</div><div class="tn">今天吃什么</div><div class="td">容园 · 和园 · 校外</div></div>
+      <div class="tile" data-go="place"><div class="ti">🗺️</div><div class="tn">今天去哪儿</div><div class="td">商圈古镇 · 山城漫步</div></div>
+      <div class="tile" data-go="study"><div class="ti">📚</div><div class="tn">今天学什么</div><div class="td">大学经典科目盲盒</div></div>
+      <div class="tile" data-go="custom"><div class="ti">✏️</div><div class="tn">自定义</div><div class="td">什么都行，你说了算</div></div>
+    </div>
+    <footer>清风Studio 2026<span>虎溪校区专属转盘</span></footer>
+  </section>
+
+  <!-- ===== 今天吃什么 ===== -->
+  <section id="pg-food">
+    <div class="top"><button class="back" data-go="home">‹</button><h2>今天吃什么</h2><span class="cnt" id="foodCnt"></span></div>
+    <div class="seg" id="foodSeg">
+      <span class="on" data-k="ry">容园</span><span data-k="hy">和园</span><span data-k="xw">校外</span>
+    </div>
+    <div class="res empty" id="res-food">
+      <div class="halo"></div><div class="ri">🍚</div><div class="rn">选个食堂，开抽！</div>
+      <div class="rd">容园 51 家 · 和园 43 家 · 校外 20 家</div><div class="rm"></div>
+    </div>
+    <button class="btn" id="go-food">🎲 随机来一个</button>
+    <div class="subs" id="subs-food"><button class="sb" data-re="food">🎯 换一个</button><button class="sb ok" data-ok="food">✓ 就吃这家</button></div>
+    <p class="note" id="foodTip"></p>
+  </section>
+
+  <!-- ===== 今天去哪儿 ===== -->
+  <section id="pg-place">
+    <div class="top"><button class="back" data-go="home">‹</button><h2>今天去哪儿</h2></div>
+    <div class="res empty" id="res-place">
+      <div class="halo"></div><div class="ri">🧭</div><div class="rn">目的地盲盒</div>
+      <div class="rd">泡泡街 25% · 熙街 25% · U城 25% · 其余 25% 探索重庆</div><div class="rm"></div>
+    </div>
+    <button class="btn" id="go-place">🎲 随机来一个</button>
+    <div class="subs" id="subs-place"><button class="sb" data-re="place">🎯 换一个</button><button class="sb ok" data-ok="place">✓ 就去这里</button></div>
+    <p class="note">抽取按真实占比加权 · 含 75 个重庆景点</p>
+  </section>
+
+  <!-- ===== 今天学什么 ===== -->
+  <section id="pg-study">
+    <div class="top"><button class="back" data-go="home">‹</button><h2>今天学什么</h2></div>
+    <div class="res empty" id="res-study">
+      <div class="halo"></div><div class="ri">📖</div><div class="rn">科目盲盒</div>
+      <div class="rd">从大学经典科目里抽一个，今天就啃它</div><div class="rm"></div>
+    </div>
+    <button class="btn" id="go-study">🎲 随机来一个</button>
+    <div class="subs" id="subs-study"><button class="sb" data-re="study">🎯 换一个</button><button class="sb ok" data-ok="study">✓ 就学这个</button></div>
+    <p class="note">抽到什么不重要，翻开书就算赢</p>
+  </section>
+
+  <!-- ===== 自定义 ===== -->
+  <section id="pg-custom">
+    <div class="top"><button class="back" data-go="home">‹</button><h2>自定义</h2><span class="cnt" id="cusCnt"></span></div>
+    <div class="res empty" id="res-custom">
+      <div class="halo"></div><div class="ri">✏️</div><div class="rn">添加选项后开抽</div>
+      <div class="rd">选 A 还是选 B？今晚学不学？都行</div><div class="rm"></div>
+    </div>
+    <button class="btn" id="go-custom">🎲 随机来一个</button>
+    <div class="subs" id="subs-custom"><button class="sb" data-re="custom">🎯 换一个</button><button class="sb ok" data-ok="custom">✓ 就这个</button></div>
+
+    <h3 class="lb">添加选项</h3>
+    <div class="row"><input class="inp" id="cusInp" placeholder="输入一个选项，回车快速添加" maxlength="30"><button class="add" id="cusAdd">＋</button></div>
+    <div class="box" id="cusList"></div>
+    <h3 class="lb">批量编辑（每行一条）</h3>
+    <textarea class="ta" id="cusTa" placeholder="一行一个选项&#10;例如：&#10;去图书馆&#10;看一集剧&#10;跑三公里"></textarea>
+    <div class="tools"><button class="tb" id="cusClear">清空</button><button class="tb pri" id="cusSave">保存批量修改</button></div>
+  </section>
+</main>
+<div class="tw" id="tw"></div>
+
+<script>
+/* ============================================================
+   数据（由 CSV 生成）：ry/hy/xw=[店名,楼栋,位置]，spots=[景点,区,特色]
+   ============================================================ */
+const DATA={"ry":[["柳家有面","容一（一楼）","一楼靠右第一家"],["渝记包粥坊","容一（一楼）","一楼靠右第二家"],["金掌柜拌饭","容一（一楼）","一楼靠右区域"],["香港映象","容一（一楼）","一楼靠右区域"],["米线 / 铺盖面","容一（一楼）","一楼靠右区域"],["基础套餐","容一（一楼）","一楼靠右区域"],["牛常有盖码饭","容一（一楼）","中间"],["盖浇饭干锅","容一（一楼）","一楼靠左第三家"],["饭饭有烫烫饭","容一（一楼）","一楼靠左第四家"],["杨记鲜切牛肉粉","容一（一楼）","一楼靠左区域"],["香炸小铺","容一（一楼）","一楼靠左区域"],["名族特色风味餐厅","容一（一楼）","一楼靠左最里面"],["一楼自选菜","容一（一楼）","一楼区域"],["0090 汉堡工厂","容一（一楼）","一楼进门处"],["素素鲜抄手","容一（一楼）","一楼区域"],["掉渣饼","容一（一楼）","一楼区域"],["胖妹面庄","容二（一楼）","一楼区域"],["猪脚饭","容二（一楼）","一楼区域"],["馄炖上岸","容二（一楼）","一楼区域"],["十八梯摊摊面","容二（一楼）","一楼区域"],["midi 小铁板","容二（一楼）","一楼区域"],["外婆拌饭","容二（一楼）","一楼区域"],["西域烤肉","容二（一楼）","一楼区域"],["烤鸭坊","容二（一楼）","一楼区域"],["轻食","容二（一楼）","一楼区域"],["面夫子（早餐）","容二（一楼）","一楼区域"],["自选菜","容二（一楼）","一楼最里面"],["冒菜","容二（一楼）","一楼区域"],["木姜子米线","容二（一楼）","一楼区域"],["爆炒盖浇面饭","容三（二楼）","二楼区域"],["麻辣香锅","容三（二楼）","二楼区域"],["KFC","容四（二楼）","二楼区域"],["现炒浇头面","容四（二楼）","二楼区域"],["川渝农家菜","容四（二楼）","二楼区域"],["石锅饭","容四（二楼）","二楼区域"],["蛋包饭","容四（二楼）","二楼区域"],["你过来鸭烤鸭饭","容四（二楼）","二楼区域"],["藤椒炒肉面馆","容四（二楼）","二楼区域"],["恰米米肉蟹煲","容五（三楼）","三楼区域"],["大咖抄手","容五（三楼）","三楼区域（主营馄饨、抄手、米线、酸辣粉）"],["川香猪脚饭","容五（三楼）","4 号档口"],["小碗菜","容五（三楼）","6 号档口"],["香酥鸡","容五（三楼）","7 号档口"],["酱香拌面","容五（三楼）","8 号档口"],["炒鸡米饭","容五（三楼）","11 号档口"],["麻辣烫","容五（三楼）","最里面"],["自选菜","容五（三楼）","最里面"],["渝小面","容五（三楼）","16 号档口"],["大碗羊肉粉","容五（三楼）","17 号档口"],["遇见炒饭","容五（三楼）","18 号档口"],["鑫源香肉拌饭","容五（三楼）","19 号档口"]],"hy":[["自选菜","和一","1 号档口"],["彭彭猪脚饭","和一","3 号档口"],["京掌柜烤盘饭","和一","4 号档口"],["烤鸭饭","和一","5 号档口"],["小铁板","和一","6 号档口"],["西域烤肉","和一","7 号档口"],["鸡汤饭","和一","8 号档口"],["粤式烧腊","和一","9 号档口"],["套餐（三荤一素 / 两荤一素）","和一","10 号档口"],["小碗菜","和一","11 号档口"],["黄焖鸡米饭","和一","12 号档口"],["水饺","和一","13 号档口"],["羊杂面","和一","14 号档口"],["外公米线","和一","15 号档口"],["芙小面","和一","16 号档口"],["兰州拉面","和一","17 号档口"],["早餐店","和一","18 号档口"],["茶瀑布","和一","区域内散铺"],["容大婶盖饭拌面","和一","区域内散铺"],["三东煎饼掉渣饼","和一","区域内散铺"],["巧卤王热卤拌饭","和一","区域内散铺"],["味子夫鸡柳","和一","区域内散铺"],["烘焙蛋糕","和一","区域内散铺"],["自选轻餐","和一","26 号档口"],["炸鸡锁骨","和一","27 号档口"],["牛肉饭","和一","28/29 号档口"],["牛肉粉","和一","30/31 号档口"],["冒菜","和一","32 号档口"],["教师食堂","和二","和二区域（仅晚间开放）"],["豆花饭","和二","和二区域"],["老陕一碗面","和二","和二区域"],["精品套餐","和二","和二区域"],["滑蛋饭","和二","和二区域"],["辣椒炒肉","和二","和二区域"],["隆江猪脚","和二","和二区域"],["坤吉双拼饭","和二","和二区域"],["烤鸭坊","和二","和二区域"],["老贵阳牛肉粉","和二","和二区域"],["自选菜","和二","和二区域"],["自选水饺 / 老麻抄手","和二","和二区域"],["梭哈面馆","和二","和二区域"],["骨汤麻辣烫","和二","和二区域"],["鲜果行","和二","和二区域"]],"xw":[["盐都干锅王","南门（泡泡街核心段）","4.5"],["卤少爷三拖一老火锅（泡泡街店）","南门（泡泡街中段）","4.4"],["新疆沙湾大盘鸡","南门（泡泡街核心段）","4.4"],["听林里花雕醉鸡","南门（泡泡街西段）","4.3"],["渝蜀宋氏鸡公煲","南门（泡泡街南段）","4.3"],["唇火锅","南门（泡泡街南段）","4.2"],["牛香居烧椒牛肉","南门（泡泡街北段）","4.2"],["秦川火锅米线","南门（泡泡街中段）","4.2"],["塔斯汀中国汉堡（泡泡街店）","南门（泡泡街北口）","4.2"],["隆江猪脚饭","南门（泡泡街中段）","4.2"],["六婆串串香（科技学院店）","南门（泡泡街西段）","4.1"],["钱摊摊安顺夺夺粉火锅（泡泡街店）","南门（泡泡街南段）","4.1"],["西湖花椒鱼（泡泡街店）","南门（泡泡街）","4.1"],["脆皮年糕（泡泡街摊）","南门（泡泡街）","4.1"],["梅干菜扣肉饼（泡泡街店）","南门（泡泡街北口）","4.1"],["山东手工水饺","南门（泡泡街）","4.0"],["荣昌铺盖面","南门（泡泡街）","4.0"],["烤玉米（泡泡街流动摊）","南门（泡泡街）","4.0"],["茶物语（泡泡街店）","南门（泡泡街）","4.0"],["书亦烧仙草（科技学院店）","南门（泡泡街北口）","4.0"]],"spots":[["解放碑步行街","渝中区","重庆城市地标，核心商业商圈，抗战文化纪念碑"],["洪崖洞民俗风貌区","渝中区","吊脚楼建筑群，夜景酷似《千与千寻》场景"],["朝天门广场","渝中区","长江与嘉陵江交汇处，重庆城市零公里起点"],["重庆来福士","渝中区","城市新地标，含高空水晶连廊观景台"],["长江索道","渝中区","跨江客运索道，“山城空中公共汽车”"],["湖广会馆","渝中区","明清古建筑群，巴渝移民文化代表建筑"],["十八梯传统风貌区","渝中区","老重庆山城街巷缩影，传统风貌改造街区"],["白象居","渝中区","24 层无电梯魔幻居民楼，江景网红打卡地"],["鹅岭二厂文创公园","渝中区","老印刷厂改造文创园，文艺风打卡圣地"],["鹅岭公园","渝中区","渝中半岛制高点，俯瞰两江四岸景色"],["李子坝轻轨穿楼观景台","渝中区","轻轨穿楼奇观，重庆标志性网红景点"],["重庆中国三峡博物馆","渝中区","国家一级博物馆，巴渝历史文化核心展陈"],["重庆市人民大礼堂","渝中区","中式经典建筑，重庆城市地标之一"],["中山四路","渝中区","民国风貌街道，抗战文化核心聚集地"],["戴家巷崖壁步道","渝中区","临江崖壁步道，俯瞰嘉陵江与洪崖洞"],["山城第三步道","渝中区","老山城特色步道，体验爬坡上坎的山城风情"],["皇冠大扶梯","渝中区","亚洲第二长一级提升坡地扶梯"],["观音桥商圈","江北区","重庆第二大核心商圈，潮流消费与夜生活聚集地"],["北仓文创园","江北区","老仓库改造文创街区，文艺小众打卡地"],["九街","江北区","重庆夜生活核心区，酒吧餐饮集中地"],["鸿恩寺森林公园","江北区","城市森林公园，鸿恩阁可俯瞰全城夜景"],["江北嘴中央公园","江北区","江北核心商务区，临江休闲绿地"],["重庆大剧院","江北区","两江交汇地标建筑，观演与建筑打卡"],["铁山坪森林公园","江北区","近郊生态公园，森林徒步与观景"],["南山一棵树观景台","南岸区","重庆夜景观赏最佳地，俯瞰渝中半岛全景"],["南山植物园","南岸区","山地植物园，四季赏花与森林休闲"],["老君洞道观","南岸区","千年道教名观，南山观景与祈福地"],["龙门浩老街","南岸区","开埠文化老街，对望渝中天际线"],["下浩里老街","南岸区","原生态老街区，市井烟火与文艺氛围"],["弹子石老街","南岸区","开埠风貌街区，长嘉汇江景视野"],["南滨路","南岸区","滨江景观大道，赏江景、看夜景的核心路线"],["黄桷垭老街","南岸区","南山古街，茶马古道历史遗迹"],["磁器口古镇","沙坪坝区","千年古镇，巴渝民俗与美食聚集地"],["白公馆","沙坪坝区","红色教育基地，革命历史纪念地"],["渣滓洞","沙坪坝区","红色教育基地，集中营旧址"],["歌乐山国家森林公园","沙坪坝区","近郊森林公园，红岩精神发源地"],["罗中立美术馆","沙坪坝区","川美虎溪校区地标，彩色外墙艺术建筑"],["四川美术学院虎溪校区","沙坪坝区","校园艺术风光，文艺打卡地"],["马房湾七彩巷","沙坪坝区","彩色涂鸦巷弄，小众网红打卡点"],["三峡广场","沙坪坝区","沙坪坝区核心商业商圈"],["重庆动物园","九龙坡区","城市核心动物园，拥有大熊猫等珍稀动物"],["黄桷坪涂鸦艺术街","九龙坡区","世界最大涂鸦艺术群，川美老校区所在地"],["交通茶馆","九龙坡区","老牌老茶馆，老重庆市井生活代表"],["建川博物馆聚落","九龙坡区","抗战、民俗等多主题博物馆群"],["华岩旅游风景区","九龙坡区","佛教圣地，华岩寺与华岩湖生态景区"],["彩云湖国家湿地公园","九龙坡区","城市湿地公园，休闲徒步与生态观光"],["杨家坪步行街","九龙坡区","九龙坡区核心商圈"],["义渡古镇","大渡口区","古渡口小镇，明清建筑风貌与市井风情"],["重庆工业博物馆","大渡口区","重庆工业发展历史核心展陈场馆"],["华生园梦幻城堡","大渡口区","欧式城堡建筑群，拍照打卡圣地"],["大渡口公园","大渡口区","城市核心休闲公园"],["缙云山国家级自然保护区","北碚区","川东名山，避暑胜地与森林徒步圣地"],["北温泉风景区","北碚区","老牌温泉景区，山水与温泉结合"],["金刀峡风景区","北碚区","峡谷自然景观，徒步溯溪胜地"],["金刚碑古镇","北碚区","原生态古村落，森林中的清幽古镇"],["偏岩古镇","北碚区","古朴水乡古镇，夏季耍水圣地"],["重庆自然博物馆","北碚区","国家一级博物馆，自然科普展陈"],["西南大学","北碚区","百年名校，校园风光优美"],["重庆园博园","渝北区","大型园林公园，汇聚全国各地园林景观"],["重庆欢乐谷","渝北区","大型主题游乐园"],["重庆科技馆","渝北区","科普教育场馆，互动体验丰富"],["重庆中央公园","渝北区","亚洲最大开放式城市中央公园"],["两江国际影视城","渝北区","民国风情影视基地，沉浸式体验"],["龙兴古镇","渝北区","明清古镇，巴渝民俗风貌"],["统景温泉风景区","渝北区","天然温泉景区，温泉与峡谷景观结合"],["重庆矿山公园","渝北区","废弃矿坑改造，有 “重庆小九寨” 之称"],["光环购物公园","渝北区","网红商业体，室内植物园 “沐光森林”"],["汉海海洋公园","巴南区","大型海洋主题乐园"],["西流沱小镇","巴南区","滨江古风小镇，休闲餐饮聚集地"],["南温泉风景区","巴南区","老牌温泉景区，历史底蕴深厚"],["东温泉风景区","巴南区","天然温泉景区"],["丰盛古镇","巴南区","千年古镇，明清建筑风貌"],["木洞古镇","巴南区","长江边古镇，木洞豆花特色美食知名"],["圣灯山森林公园","巴南区","近郊森林公园，登山休闲"],["云篆山森林公园","巴南区","巴南名山，登山与乡村休闲"]]};
+
+/* ===== 今天学什么：大学经典科目 ===== */
+const STUDY=[
+ ['📐','高等数学','极限与导数，挂科预警榜首'],
+ ['🧮','线性代数','矩阵的一生，从行列式到特征值'],
+ ['🎲','概率论与数理统计','学完才懂：随机也是科学'],
+ ['🔤','C 语言程序设计','一切编程的起点，指针劝退大师'],
+ ['🌲','数据结构','链表、树、图，面试三大件'],
+ ['💻','操作系统','进程线程与死锁的艺术'],
+ ['🌐','计算机网络','三次握手，四次挥手'],
+ ['🗄️','数据库原理','增删改查，CRUD 工程师之路'],
+ ['⚛️','大学物理','高中物理 Pro Max 版'],
+ ['🧪','基础化学','元素周期表的深度游'],
+ ['📏','线性代数实验','MATLAB 里跑矩阵'],
+ ['📖','大学英语','四六级的主战场'],
+ ['✍️','学术写作','论文格式，改到天亮'],
+ ['🏃','体育','唯一不用闹钟催的课'],
+ ['🧠','逻辑学','把「我觉得」变成「因为所以」'],
+ ['⚡','电路原理','基尔霍夫定律护体'],
+ ['📊','离散数学','计算机数学之魂'],
+ ['🛰️','软件工程','从需求到上线的一公里'],
+];
+
+/* ===== 今天去哪儿：固定地点 + 权重，25% 概率抽重庆景点池 ===== */
+const FIXED=[
+ {e:'🧋',n:'泡泡街',w:25,d:'南门外的美食街，烟火气拉满'},
+ {e:'🛍️',n:'熙街',w:25,d:'大学城核心商圈，吃喝玩乐一条龙'},
+ {e:'🎡',n:'U城',w:25,d:'U城天街，逛街看电影的根据地'},
+ {e:'🏙️',n:'沙坪坝',w:5,d:'三峡广场，老牌书香商圈'},
+ {e:'🏮',n:'磁器口',w:5,d:'千年古镇，逛吃逛吃'},
+ {e:'🌃',n:'观音桥',w:5,d:'江北核心商圈，都市夜生活'},
+ {e:'🏬',n:'大坪',w:5,d:'时代天街，逛到腿软的巨无霸商圈'},
+ {e:'🚩',n:'重庆景点盲盒',w:5,d:''}, // 命中后再从 DATA.spots 随机
+];
+
+/* ===== 通用工具 ===== */
+const $=s=>document.querySelector(s),LS='decide.custom.v1';
+let cur={},spinning=false;
+function toast(m,ok){const e=document.createElement('div');e.className='to'+(ok?' ok':'');e.textContent=m;
+  $('#tw').appendChild(e);setTimeout(()=>e.remove(),2300)}
+function show(pg){
+  document.querySelectorAll('section').forEach(s=>s.classList.remove('on'));
+  const p=$('#pg-'+pg);void p.offsetWidth;p.classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('[data-go]').forEach(el=>el.onclick=()=>show(el.dataset.go));
+
+/* ===== 通用抽取：pool=[{e,n,d,m}]，resId 结果卡，fn 落定后回调 ===== */
+function spin(resId,pool,onDone){
+  if(spinning)return;
+  if(!pool.length){toast('清单是空的，先添加选项吧');return}
+  spinning=true;
+  const card=$('#res-'+resId),btn=$('#go-'+resId),subs=$('#subs-'+resId);
+  card.classList.remove('empty','settled');
+  btn.disabled=true;btn.textContent='🎰 命运转动中…';subs.classList.remove('show');
+  const ri=card.querySelector('.ri'),rn=card.querySelector('.rn'),
+        rd=card.querySelector('.rd'),rm=card.querySelector('.rm'),halo=card.querySelector('.halo');
+  let n=0;const T=14;
+  const t=setInterval(()=>{
+    const p=pool[Math.random()*pool.length|0];
+    ri.textContent=p.e;rn.textContent=p.n;rd.textContent=p.d||'';rm.innerHTML='';
+    if(++n>=T){clearInterval(t);
+      // 避免与上一次结果重复
+      let f=p;
+      if(pool.length>1){let k=0;while(f.n===cur[resId]&&k++<6)f=pool[Math.random()*pool.length|0]}
+      cur[resId]=f.n;
+      card.classList.remove('spinning');
+      ri.textContent=f.e;rn.textContent=f.n;rd.textContent=f.d||'';
+      rm.innerHTML=(f.m||[]).map(x=>`<span class="pill">${x}</span>`).join('');
+      halo.classList.remove('go');void halo.offsetWidth;halo.classList.add('go');
+      card.classList.add('settled');
+      btn.disabled=false;btn.textContent='🎲 再抽一次';subs.classList.add('show');
+      spinning=false;onDone&&onDone(f);
+    }else card.classList.add('spinning');
+  },60);
+}
+
+/* ===== 今天吃什么 ===== */
+let foodK='ry';
+const foodMeta=f=>[f[1],f[2]].filter(Boolean);
+function foodPool(){return DATA[foodK].map(f=>({e:'🍽️',n:f[0],d:'',m:foodMeta(f)}))}
+$('#foodSeg').querySelectorAll('span').forEach(s=>s.onclick=()=>{
+  $('#foodSeg').querySelector('.on').classList.remove('on');s.classList.add('on');
+  foodK=s.dataset.k;$('#subs-food').classList.remove('show');updateFoodCnt();
+  const tip={ry:'容园',hy:'和园',xw:'校外'}[foodK];
+  $('#res-food').querySelector('.rd').textContent=`${tip}共 ${DATA[foodK].length} 家，开抽！`;
+});
+function updateFoodCnt(){$('#foodCnt').textContent=DATA[foodK].length+' 家'}
+$('#go-food').onclick=()=>spin('food',foodPool(),f=>$('#foodTip').textContent='');
+document.querySelector('[data-re="food"]').onclick=()=>spin('food',foodPool().filter(x=>x.n!==cur.food));
+document.querySelector('[data-ok="food"]').onclick=()=>{toast(`🎉 今天就吃「${cur.food}」！`,1)};
+
+/* ===== 今天去哪儿（加权） ===== */
+function placePool(){
+  const pool=[...FIXED.map(p=>({e:p.e,n:p.n,d:p.d||'',w:p.w}))];
+  const spot=DATA.spots[Math.random()*DATA.spots.length|0];
+  pool.push({e:'📸',n:spot[0],d:spot[2]||'值得一看的重庆去处',m:[spot[1]],w:5});
+  return pool;
+}
+function wpick(pool){ // 按权重抽一个
+  let t=pool.reduce((s,p)=>s+p.w,0),r=Math.random()*t;
+  for(const p of pool){if((r-=p.w)<0)return p}
+  return pool[0];
+}
+$('#go-place').onclick=()=>spinCustom('place',()=>placePool());
+function spinCustom(resId,getPool){ // 池子每次动态生成（加权/景点随机）
+  if(spinning)return;const pool=getPool();
+  if(!pool.length){toast('清单是空的');return}
+  spinning=true;
+  const card=$('#res-'+resId),btn=$('#go-'+resId),subs=$('#subs-'+resId);
+  card.classList.remove('empty','settled');
+  btn.disabled=true;btn.textContent='🎰 命运转动中…';subs.classList.remove('show');
+  const ri=card.querySelector('.ri'),rn=card.querySelector('.rn'),rd=card.querySelector('.rd'),
+        rm=card.querySelector('.rm'),halo=card.querySelector('.halo');
+  let n=0;const T=14;
+  const t=setInterval(()=>{
+    const p=wpick(pool);
+    ri.textContent=p.e;rn.textContent=p.n;rd.textContent=p.d||'';rm.innerHTML='';
+    if(++n>=T){clearInterval(t);let f=p,k=0;
+      while(f.n===cur[resId]&&k++<6)f=wpick(pool);
+      cur[resId]=f.n;card.classList.remove('spinning');
+      ri.textContent=f.e;rn.textContent=f.n;rd.textContent=f.d||'';
+      rm.innerHTML=(f.m||[]).map(x=>`<span class="pill">${x}</span>`).join('');
+      halo.classList.remove('go');void halo.offsetWidth;halo.classList.add('go');
+      card.classList.add('settled');
+      btn.disabled=false;btn.textContent='🎲 再抽一次';subs.classList.add('show');
+      spinning=false}
+    else card.classList.add('spinning');
+  },60);
+}
+document.querySelector('[data-re="place"]').onclick=()=>spinCustom('place',()=>placePool());
+document.querySelector('[data-ok="place"]').onclick=()=>toast(`🎉 今天就去「${cur.place}」！`,1);
+
+/* ===== 今天学什么 ===== */
+const studyPool=()=>STUDY.map(s=>({e:s[0],n:s[1],d:s[2]}));
+$('#go-study').onclick=()=>spin('study',studyPool());
+document.querySelector('[data-re="study"]').onclick=()=>spin('study',studyPool().filter(x=>x.n!==cur.study));
+document.querySelector('[data-ok="study"]').onclick=()=>toast(`🎉 今天就学「${cur.study}」！`,1);
+
+/* ===== 自定义 ===== */
+let cus=[];
+try{cus=JSON.parse(localStorage.getItem(LS))||[]}catch(e){}
+function saveCus(){try{localStorage.setItem(LS,JSON.stringify(cus))}catch(e){}}
+function cusPool(){return cus.map(n=>({e:'✅',n}))}
+function renderCus(){
+  $('#cusCnt').textContent=cus.length+' 项';
+  $('#cusList').innerHTML=cus.length?cus.map((n,i)=>
+    `<div class="it"><span>${n}</span><i data-i="${i}">×</i></div>`).join('')
+    :'<div class="it" style="justify-content:center;color:var(--sub)">还没有选项</div>';
+  $('#cusList').querySelectorAll('i').forEach(el=>el.onclick=()=>{
+    cus.splice(+el.dataset.i,1);saveCus();renderCus();
+    $('#subs-custom').classList.remove('show')});
+}
+function addCus(){
+  const v=$('#cusInp').value.trim();
+  if(!v){toast('先输入内容');return}
+  if(cus.includes(v)){toast('已经有这条了');return}
+  cus.push(v);$('#cusInp').value='';saveCus();renderCus();toast('已添加',1);
+}
+$('#cusAdd').onclick=addCus;
+$('#cusInp').onkeydown=e=>{if(e.key==='Enter')addCus()};
+$('#cusClear').onclick=()=>{if(!cus.length)return;cus=[];saveCus();renderCus();
+  $('#subs-custom').classList.remove('show');toast('已清空')};
+$('#cusSave').onclick=()=>{
+  const rows=$('#cusTa').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  if(!rows.length){toast('内容不能为空');return}
+  cus=[...new Set(rows)];saveCus();renderCus();toast(`已保存 ${cus.length} 个选项`,1);
+};
+$('#go-custom').onclick=()=>spin('custom',cusPool());
+document.querySelector('[data-re="custom"]').onclick=()=>spin('custom',cusPool().filter(x=>x.n!==cur.custom));
+document.querySelector('[data-ok="custom"]').onclick=()=>toast(`🎉 就「${cur.custom}」！`,1);
+
+/* ===== init ===== */
+updateFoodCnt();renderCus();
+$('#cusTa').value=cus.join('\n');
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){
+    e.preventDefault();
+    const on=document.querySelector('section.on').id.replace('pg-','');
+    if(on!=='home')$('#go-'+on).click();
+  }
+});
+</script>
+</body>
+</html>
